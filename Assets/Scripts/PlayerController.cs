@@ -80,7 +80,7 @@ public class PlayerController : MonoBehaviour
             FlipSprite();
             FlipCamera();
         }
-
+        
         ManageAnimator();
     }
 
@@ -149,16 +149,15 @@ public class PlayerController : MonoBehaviour
         if (xMoveInput > 0.1f)
         {
             isFacingRight = true;
-            _spriteRenderer.flipX = false;
         }
         else if (xMoveInput < -0.1f)
         {
             isFacingRight = false;
-            _spriteRenderer.flipX = true;
         }
+        
+        _spriteRenderer.flipX = isFacingRight;
     }
-   
-
+    
     private void ManageAnimator()
     {
         if (xMoveInput != 0)

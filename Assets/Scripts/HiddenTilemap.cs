@@ -15,6 +15,16 @@ public class HiddenTilemap : MonoBehaviour
         color = tilemap.color;
     }
 
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            color.a = 0.3f;
+            tilemap.color = color;
+        }
+    }
+
+    
     void OnTriggerStay2D(Collider2D other)
     {
         if (other.CompareTag("Player"))

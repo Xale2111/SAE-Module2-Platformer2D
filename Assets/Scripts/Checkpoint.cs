@@ -16,7 +16,6 @@ public class Checkpoint : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Debug.Log("Checkpoint reached!");
             spawnPoint.transform.position = transform.position;
             Destroy(gameObject);
         }

@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
     private static readonly int VelocityY = Animator.StringToHash("VelocityY");
     private static readonly int Hit = Animator.StringToHash("IsHit");
     
-    //---- PUBLIC VARIABLES ----
+    //---- SERIALIZED VARIABLES ----
     
     [Header("Movement")]
     [Space(5)]
@@ -59,6 +59,11 @@ public class PlayerController : MonoBehaviour
     [Space(10)]
     [SerializeField] private GameObject spriteContainer;
     [Min(0.01f)][SerializeField] private float weightScaleMultiplier = 0.05f;
+        
+    [Header("Particles")] [Space(10)] 
+    [SerializeField] private ParticleSystem dustParticles;
+    [SerializeField] private ParticleSystem impactParticles;
+    [SerializeField] private float particleOffset = 0.2f;
     
     [Header("UI")] [Space(15)] 
     [SerializeField] private UnityEvent OnAddScore;
@@ -68,6 +73,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float walkSoundRate = 0.4f;
     [Space(5)][SerializeField] private float runSoundRate = 0.3f;
     [Space(7.5f)][SerializeField] private UnityEvent OnWalkPlaySound;
+
     
     //---- PRIVATE VARIABLES ----
     
@@ -145,8 +151,11 @@ public class PlayerController : MonoBehaviour
         {
             coyoteTimeCounter -= Time.deltaTime;
         }
-        
-        moveSpeed = runIsPressed ? _runningSpeed : _speed;
+
+        if (isGrounded)
+        {
+            moveSpeed = runIsPressed ? _runningSpeed : _speed;
+        }
         
         if (canMove)
         {
@@ -158,9 +167,10 @@ public class PlayerController : MonoBehaviour
         {
             ShakeCamera();
         }
+
+        ManageDustParticles();
         
         ManageAnimator();
-        
         ManageAudio();
     }
 
@@ -258,7 +268,31 @@ public class PlayerController : MonoBehaviour
         
         _spriteRenderer.flipX = isFacingRight;
     }
-    
+
+    private void ManageDustParticles()
+    {
+        if (isGrounded && _rb.linearVelocity.x != 0)
+        {
+            dustParticles.Play();
+        }
+        else
+        {
+            dustParticles.Stop();
+        }
+
+        if (dustParticles.isPlaying)
+        {
+            if (isFacingRight)
+            {
+                dustParticles.transform.position = new Vector2(transform.position.x - particleOffset, dustParticles.transform.position.y);
+            }
+            else
+            {
+                dustParticles.transform.position = new Vector2(transform.position.x + particleOffset, dustParticles.transform.position.y);
+            }
+        }
+    }
+
     private void ManageAnimator()
     {
         if (xMoveInput != 0)
@@ -430,11 +464,19 @@ public class PlayerController : MonoBehaviour
         mainCamera.AmplitudeGain = 0;
     }
     
+    public void PlayImpactParticles()
+    {
+        if (!impactParticles.isPlaying)
+        {
+            impactParticles.Play();
+        }
+    }
+    
     private void ShakeCamera()
     {
         //calculate shake intensity based on score
         float shakeIntensity = 0f;
-        if (score != 0)
+        if (score > 0)
         {
             //score^3/(10^3*score)
             shakeIntensity = (Mathf.Pow(score, 3)/(Mathf.Pow(10,3)*score));   
